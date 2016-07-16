@@ -16,7 +16,7 @@
 
 #### Файлы:
 - [видеофайл](http://www.kinopoisk.ru/getlink.php?id=284167&type=trailer&link=https://kp.cdn.yandex.net/502838/kinopoisk.ru-Sherlock-284167.mp4) трейлера (но можно и любой другой)
-- текстовый [файл](https://www.kinopoisk.ru/handler_subtitles.php?p=502838/126564_20151013115313.xml) субтитров
+- текстовый [файл](https://github.com/shri-msk-2016/dz-multimedia/blob/master/subs.srt) субтитров
 - аудиофайл с музыкой тапёра: [Maple Leaf Rag](https://upload.wikimedia.org/wikipedia/commons/a/a6/Maple_Leaf_RagQ.ogg),
 [The Entertainer](https://upload.wikimedia.org/wikipedia/commons/2/2c/The_Entertainer_-_1902_-_By_Scott_Joplin.ogg) (ну или возьмите свой любимый регтайм :-)
 - в качестве шрифта можно использовать [Oranienbaum](https://www.google.com/fonts/specimen/Oranienbaum)
