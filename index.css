@@ -17,6 +17,13 @@ html, body
     max-width: 533px;
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+.player--loader:before
+{
+    content: 'загружаю';
+    position: absolute;
 }
 
 .player__control
