@@ -160,7 +160,7 @@
                 loaders.subtitles(config.srtLink),
                 loaders.video(config.videoLink),
                 loaders.audio(config.audioLink),
-                loaders.sfx('/old.mp4')
+                loaders.sfx('old.mp4')
             ])
             .then(res => {
                 let player = Player.instance('#player', {
