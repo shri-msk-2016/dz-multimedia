@@ -282,11 +282,13 @@
             return new Promise(resolve => {
                 let video = document.createElement('video')
                 video.src = link
+                video.addEventListener('loadeddata', () => {
+                    video.play()
+                    resolve(video)
+                })
                 video.addEventListener('ended', () => {
                     video.play()
                 }, false)
-                video.play()
-                resolve(video)
             })
         }
     }
