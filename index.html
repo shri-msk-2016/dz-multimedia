@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="utf-8">
+        <title>Киноглушитель</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Oranienbaum' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="index.css">
+    </head>
+    <body>
+        <section class="screen welcome">
+            <form class="" id="linksForm" action="getLinks">
+                <input type="text" name="videoLink" placeholder="Ссылка на видео" value="video.webm">
+                <input type="text" name="srtLink" placeholder="Ссылка на субтитры" value="subs.srt">
+                <input type="text" name="audioLink" placeholder="Ссылка на саундтрек" value="https://upload.wikimedia.org/wikipedia/commons/a/a6/Maple_Leaf_RagQ.ogg">
+                <button type="submit">Заглушить</button>
+            </form>
+        </section>
+        <section class="screen player__wrap">
+            <div class="player">
+                <canvas id="player" class="player__video" width="533" height="300"></canvas>
+                <span class="player__control">
+                    <button type="button" class="player__video-button" hidden>play/pause</button>
+                    <input type="range" class="player__video-duration-changer" name="name" min="1" value="1">
+                </span>
+            </div>
+            <span id="timestamp" hidden></span>
+            <span id="videotimestamp" hidden></span>
+        </section>
+    </body>
+    <script src="js/tools.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/Subtitle.js"></script>
+    <script src="js/index.js"></script>
+</html>

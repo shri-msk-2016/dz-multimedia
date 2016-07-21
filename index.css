@@ -1,0 +1,38 @@
+html, body
+{
+    margin: 0;
+    padding: 0;
+    background-color: #d8d8d8;
+}
+
+.hidden
+{
+    /*visibility: hidden;*/
+    display: none;
+}
+
+
+.player
+{
+    max-width: 533px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.player--loader:before
+{
+    content: 'загружаю';
+    position: absolute;
+}
+
+.player__control
+{
+    display: flex;
+    flex-direction: row;
+}
+
+.player__video-duration-changer
+{
+    flex-grow: 4;
+}
