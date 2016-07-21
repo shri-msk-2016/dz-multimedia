@@ -10,6 +10,8 @@ class Player { // eslint-disable-line
         this._subtitle = options.subtitle
         this._audio = options.audio
 
+        document.querySelector('.player__video-duration-changer').max = this.duration
+
         let DOMElement = document.querySelector(selector)
         this._canvas = DOMElement
         this._context = DOMElement.getContext('2d')

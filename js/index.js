@@ -31,48 +31,75 @@
         const vertexShaderCode = `attribute vec2 coordinates;
             attribute vec2 texture_coordinates;
             varying vec2 v_texcoord;
-            void main() {
-                gl_Position = vec4(coordinates,0.0, 1.0);
-                v_texcoord = texture_coordinates;
-            };`
 
-        const fragShaderCode = `precision mediump float;
+            void main() {
+                gl_Position = vec4(coordinates, 0.0, 1.0);
+                v_texcoord = texture_coordinates;
+            }`
+
+        const fragShaderCode = `
+            precision mediump float;
             varying vec2 v_texcoord;
             uniform sampler2D u_texture;
-            uniform float u_time;
+            //uniform float u_time;
             void main() {
-                gl_FragColor = texture2D(u_texture, v_texcoord) * .8 + texture2D(u_texture, v_texcoord) * rand(v_texcoord * u_time) * .2;
-            };`
+                //float a = 0.5;
+                // gl_FragColor = vec4(1.0, 0, 0, 1.0);
+
+                gl_FragColor = texture2D(u_texture, v_texcoord);
+            }`
+
+        const vertices = new Float32Array([
+            0.0, 0.0,
+            1.0, 0.0,
+            0.0, 1.0,
+            0.0, 1.0,
+            1.0, 0.0,
+            1.0, 1.0
+        ])
         let glCanvas = document.createElement('canvas')
-        let gl = glCanvas.getContext('experimental-webgl')
+        glCanvas.width = 533
+        glCanvas.height = 300
+        let gl = glCanvas.getContext('webgl')
+
+        const checkShaderCompiled = (shader) => {
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.log(`invalid shader : ${gl.getShaderInfoLog(shader)}`) // eslint-disable-line
+            }
+            return 0
+        }
+
         if (gl) {
             let vertexShader = gl.createShader(gl.VERTEX_SHADER)
             gl.shaderSource(vertexShader, vertexShaderCode)
             gl.compileShader(vertexShader)
+            checkShaderCompiled(vertexShader)
 
             let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
             gl.shaderSource(fragmentShader, fragShaderCode)
             gl.compileShader(fragmentShader)
+            checkShaderCompiled(fragmentShader)
 
             let program = gl.createProgram()
 
             gl.attachShader(program, vertexShader)
             gl.attachShader(program, fragmentShader)
+
             gl.linkProgram(program)
+            gl.validateProgram(program)
+
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                let info = gl.getProgramInfoLog(program)
+                console.error(info) // eslint-disable-line
+            }
+
             gl.useProgram(program)
 
             let buffer = gl.createBuffer()
-            let vertices = [
-                /* x, y */
-                -1, -1,
-                1, -1, -1, 1, -1, 1,
-                1, -1,
-                1, 1
-            ]
 
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
             gl.bufferData(
-                gl.ARRAY_BUFFER, new Float32Array(vertices),
+                gl.ARRAY_BUFFER, vertices,
                 gl.STATIC_DRAW
             );
             gl.bindBuffer(gl.ARRAY_BUFFER, null)
@@ -93,20 +120,21 @@
                 return grayscaleJS(canvas)
             }
 
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
-
+            gl.viewportWidth = canvas.width
+            gl.viewportHeight = canvas.height
+            glCanvas.width = canvas.width
+            glCanvas.height = canvas.height
             gl.texImage2D(
                 gl.TEXTURE_2D,
                 0, gl.RGBA, gl.RGBA,
                 gl.UNSIGNED_BYTE,
-                glCanvas // <-- вся магия здесь!
+                canvas // <-- вся магия здесь!
             )
 
             gl.viewport(0, 0, canvas.width, canvas.height)
             gl.enable(gl.DEPTH_TEST)
             gl.clear(gl.COLOR_BUFFER_BIT)
-            gl.drawArrays(gl.TRIANGLES, 0, 6)
+            gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2)
 
             ctx.drawImage(glCanvas, 0, 0, canvas.width, canvas.height)
             return canvas
@@ -127,7 +155,6 @@
         }
     }
 
-    // let canvas = document.querySelector('#player');
     let getPlayer = function(config) {
         return Promise.all([
                 loaders.subtitles(config.srtLink),
@@ -141,7 +168,6 @@
                     video: res[1],
                     audio: res[2]
                 });
-                document.querySelector('.player__video-duration-changer').max = player.duration
                 window.test = player._subtitle
                 return [player, res[3]]
             })
@@ -155,9 +181,8 @@
         getPlayer(e.target.raw_serialize()).then(res => {
             let player = res[0]
             let sfx = res[1]
-                // grayscaleGL()
             player.effects = [grayscaleJS, oldFilm(sfx)]
-                // player.effects = [grayscaleGL(), grayscaleJS, oldFilm(sfx)]
+            // player.effects = [grayscaleGL(), oldFilm(sfx)]
             player.play()
         })
     }
@@ -189,7 +214,6 @@
 
                 video.height = 300
                 video.width = 533
-
                 // video.crossOrigin = "anonymous"
                 video.loop = false
                 video.src = link
@@ -221,44 +245,34 @@
 
                     let bufferSize = 512
 
-                    // brown noize
-                    // var brownNoise = (function() {
-                    //     var lastOut = 0.0;
-                    //     var node = audioContext.createScriptProcessor(bufferSize, 1, 1);
-                    //     node.onaudioprocess = function(e) {
-                    //         var output = e.outputBuffer.getChannelData(0);
-                    //         for (var i = 0; i < bufferSize; i++) {
-                    //             var white = Math.random() * 2 - 1;
-                    //             output[i] = (lastOut + (0.02 * white)) / 1.02;
-                    //             lastOut = output[i];
-                    //             output[i] *= 3.5;
-                    //         }
-                    //     }
-                    //     return node;
-                    // })();
+                    let pinkNoise = (function() {
+                        let node = audioContext.createScriptProcessor(bufferSize / 2, 1, 1)
 
-                    // white noize
-                    let whiteNoize = audioContext.createBufferSource()
-                    let buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate)
-                    let data = buffer.getChannelData(0);
+                        node.onaudioprocess = function(e) {
+                            for (let ch = 0; ch < e.outputBuffer.numberOfChannels; ch++) {
+                                let inputData = e.inputBuffer.getChannelData(ch)
+                                let outputData = e.outputBuffer.getChannelData(ch)
 
-                    for (var i = 0; i < bufferSize; i++) {
-                        data[i] = Math.random()
-                    }
-                    whiteNoize.buffer = buffer
-                    whiteNoize.loop = true
+                                for (let i = 0; i < e.inputBuffer.length; i++) {
+                                    let white = Math.random() * 2 - 1
+                                    outputData[i] = inputData[i] + white * 0.01
+                                }
+                            }
+                        }
 
-                    whiteNoize.connect(gainNode)
+                        return node
+                    }())
+
+                    // pinkNoise.connect(gainNode)
 
                     gainNode.connect(audioContext.destination)
-                    // console.dir(whiteNoize)
                     audio.addEventListener('pause', () => {
-                        whiteNoize.stop()
-                        whiteNoize.disconnect()
+                        // pinkNoise.stop()
+                        pinkNoise.disconnect()
                     })
                     audio.addEventListener('play', () => {
-                        whiteNoize.connect(gainNode)
-                        whiteNoize.start(0)
+                        pinkNoise.connect(gainNode)
+                        // pinkNoise.start(0)
                     })
                     resolve(audio)
                 })
