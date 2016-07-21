@@ -1,5 +1,5 @@
-const MIN_FRAME_RATE = 20;
-const MAX_FRAME_RATE = 30;
+const MIN_FRAME_RATE = 20
+const MAX_FRAME_RATE = 30
 
 class Player { // eslint-disable-line
     constructor(selector, options) {
@@ -20,11 +20,14 @@ class Player { // eslint-disable-line
 
         this._workCanvas = document.createElement('canvas')
         this.__timeoutId = false
+        this.__tickId = false
 
         this.__timer = {}
 
         this.isNeedDownFPS = true
         this.currentTime = 0
+
+        // this.paused = true
 
         // document.querySelector('.player__video-duration-changer').addEventListener('')
         // document.querySelector('.player__video-button').addEventListener('click', () => {
@@ -35,12 +38,9 @@ class Player { // eslint-disable-line
         //         this.pause()
         //     }
         // })
-
-
     }
 
     get played() { return Boolean(this.__timeoutId) }
-    get paused() { return !this.played }
 
     draw(timestamp, canvas, work, video, srt, effects) {
         let workCtx = work.getContext('2d')
@@ -48,9 +48,8 @@ class Player { // eslint-disable-line
         if (srtFlag) {
             video.pause()
         } else {
-            // console.log(this.paused);
-            if (!this.paused) { video.play() }
-            workCtx.drawImage(video, 0, 0, canvas.width, canvas.height)
+            video.play()
+            workCtx.drawImage(video, 0, 0, work.width, work.height)
         }
 
         work = effects.reduce((canvas, effect) => effect(canvas), work)
@@ -78,8 +77,8 @@ class Player { // eslint-disable-line
         let effects = this.effects
         let srt = this._subtitle
 
-        if (video.ended) { return }
-        setTimeout(() => {
+        if (video.ended) { this.pause(); return }
+        this.__tickId = setTimeout(() => {
             requestAnimationFrame(() => {
                 this.updateControls(timestamp, this.__videotimestamp)
                 this.draw(timestamp, canvas, work, video, srt, effects)
@@ -90,9 +89,9 @@ class Player { // eslint-disable-line
 
     __tick() {
         this.__timeoutId = setTimeout(() => {
-            let time = new Date().getTime() - this.__timer.start;
+            let time = new Date().getTime() - this.__timer.start
             let elapsed = Math.floor(time / 100) / 10;
-            if(Math.round(elapsed) === elapsed) { elapsed += '.0'; }
+            if(Math.round(elapsed) === elapsed) { elapsed += '.0' }
             this.__timer.elapsed = elapsed
             this.currentTime = time
             this.__tick()
@@ -100,24 +99,30 @@ class Player { // eslint-disable-line
     }
 
     play(time) {
+        time = time || 0
+
+        let video = this._video
+        let audio = this._audio
+
         if (!this.paused) {
             this.pause()
         }
-
         if (time) {
             this.currentTime = time
-            this._video.currentTime = TimeHelper.msToSec(this.__videotimestamp)
-            this._audio.currentTime = TimeHelper.msToSec(time)
+            video.currentTime = TimeHelper.msToSec(this.__videotimestamp)
+            audio.currentTime = TimeHelper.msToSec(time)
         }
-        this._video.play()
-        this._audio.play()
+
+        this.paused = true
+        video.play()
+        audio.play()
         let newTimer = {}
         // if (this.__timer) {
             // newTimer = Object.assign({}, this.__timer, {start: new Date().getTime()})
         // } else {
             newTimer = {
                 start: new Date().getTime(),
-                elapsed: '0.0'
+                elapsed: TimeHelper.msToSec(time)
             }
         // }
 
@@ -127,13 +132,16 @@ class Player { // eslint-disable-line
     }
 
     pause() {
+        this.paused = false
         this._video.pause()
         this._audio.pause()
+
         clearTimeout(this.__timeoutId)
+        clearTimeout(this.__tickId)
     }
 
     get duration() {
-        return TimeHelper.secToMs(this._video.duration) + this._subtitle.duration;
+        return TimeHelper.secToMs(this._video.duration) + this._subtitle.duration
     }
 
     get __videotimestamp() {
@@ -148,13 +156,13 @@ class Player { // eslint-disable-line
     }
 
     static instance(selector, options) {
-        let instance = null;
+        let instance = null
         if (this._instance) {
-            instance = this._instance;
+            instance = this._instance
         } else {
             instance = new Player(selector, options)
-            this._instance = instance;
+            this._instance = instance
         }
-        return instance;
+        return instance
     }
 }

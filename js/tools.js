@@ -16,46 +16,46 @@
                     case 'reset':
                     case 'submit':
                         q[that.elements[i].name] =  that.elements[i].value
-                    break;
+                    break
                     case 'checkbox':
                     case 'radio':
                     if (that.elements[i].checked) {
                         q[that.elements[i].name] = that.elements[i].value
                     }
-                    break;
+                    break
                 }
-                break;
+                break
                 case 'file':
-                break;
+                break
                 case 'TEXTAREA':
                     q[that.elements[i].name] = that.elements[i].value
-                break;
+                break
                 case 'SELECT':
                 switch (that.elements[i].type) {
                     case 'select-one':
                         q[that.elements[i].name] = that.elements[i].value
-                    break;
+                    break
                     case 'select-multiple':
                     for (j = that.elements[i].options.length - 1; j >= 0; j = j - 1) {
                         if (that.elements[i].options[j].selected) {
                             q[that.elements[i].name] = that.elements[i].options[j].value
                         }
                     }
-                    break;
+                    break
                 }
-                break;
+                break
                 case 'BUTTON':
                 switch (that.elements[i].type) {
                     case 'reset':
                     case 'submit':
                     case 'button':
                         q[that.elements[i].name] = that.elements[i].value
-                    break;
+                    break
                 }
-                break;
+                break
             }
         }
-        return q;
+        return q
     }
 
     HTMLFormElement.prototype.raw_serialize = serialize

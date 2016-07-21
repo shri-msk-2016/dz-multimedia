@@ -1,6 +1,6 @@
 class Subtitle {
     constructor(text) {
-        this._subtitles = Subtitle.parse(text);
+        this._subtitles = Subtitle.parse(text)
     }
 
     /**
@@ -17,7 +17,7 @@ class Subtitle {
      * @return {object} parsed subtitles
      */
     static parse(text) {
-        text = text.replace(/\r/g, '');
+        text = text.replace(/\r/g, '')
         let regex = /(\d+)\n(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})/g
         text = text.split(regex)
         text.shift()
@@ -38,7 +38,7 @@ class Subtitle {
 class SilentMovieSubtitle extends Subtitle { // eslint-disable-line
     constructor(text) {
         super(text)
-        this._subtitles = SilentMovieSubtitle.toSilentMovie(this._subtitles);
+        this._subtitles = SilentMovieSubtitle.toSilentMovie(this._subtitles)
     }
 
     static toSilentMovie(subtitles) {
@@ -150,12 +150,12 @@ class SubtitleShowControl { // eslint-disable-line
                 // about this in a meaningful way
             } else {
                 // We determine the y of the first line
-                let ly = (h - both) / 2 + y + spl * lines.length;
+                let ly = (h - both) / 2 + y + spl * lines.length
                 let lx = 0;
                 for (let j = 0; j < lines.length; ++j, ly+=fh+spl) {
                     // We continue to centralize the lines
-                    lx = x + w / 2 - ctx2d.measureText(lines[j]).width / 2;
-                    ctx2d.fillText(lines[j], lx, ly);
+                    lx = x + w / 2 - ctx2d.measureText(lines[j]).width / 2
+                    ctx2d.fillText(lines[j], lx, ly)
                 }
             }
         }

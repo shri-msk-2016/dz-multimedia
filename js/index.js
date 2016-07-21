@@ -11,20 +11,17 @@
         ctx.fillRect(0, 0, w, h)
         ctx.globalCompositeOperation = defaultGlobalCompositeOperation
         return canvas
+    }
 
-        // let imageData = ctx.getImageData(0, 0, w, h)
-        // let pixels = imageData.data
-        //
-        // for (let i = 0, n = pixels.length; i < n; i += 4) {
-        //     let grayscale = pixels[i] * .3 + pixels[i + 1] * .59 + pixels[i + 2] * .11
-        //     pixels[i] = grayscale;   // red
-        //     pixels[i+1] = grayscale;   // green
-        //     pixels[i+2] = grayscale;   // blue
-        // }
-        //
-        // imageData.data = pixels
-        // ctx.putImageData(imageData, 0, 0)
-        // return canvas
+    let filmGrain = (canvas) => { //eslint-disable-line
+        let ctx = canvas.getContext('2d')
+        for (let i = 1e6; i--; ) {
+            let x = i % 1e3
+            let y = i / 1e3
+            ctx.fillStyle =  `hsl(${~~Math.tan(x * y)}, 40%, 40%)` //eslint-disable-line
+            ctx.fillRect(x, y, 1, 1)
+        }
+        return canvas
     }
 
     let grayscaleGL = () => { // eslint-disable-line
@@ -41,12 +38,10 @@
             precision mediump float;
             varying vec2 v_texcoord;
             uniform sampler2D u_texture;
-            //uniform float u_time;
             void main() {
-                //float a = 0.5;
-                // gl_FragColor = vec4(1.0, 0, 0, 1.0);
-
+                // float a = 0.5;
                 gl_FragColor = texture2D(u_texture, v_texcoord);
+                gl_FragColor.rgb = vec3(dot(gl_FragColor.rgb, vec3(0.2989, 0.5870, 0.1140)));
             }`
 
         const vertices = new Float32Array([
@@ -101,7 +96,7 @@
             gl.bufferData(
                 gl.ARRAY_BUFFER, vertices,
                 gl.STATIC_DRAW
-            );
+            )
             gl.bindBuffer(gl.ARRAY_BUFFER, null)
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
 
@@ -156,6 +151,7 @@
     }
 
     let getPlayer = function(config) {
+        document.querySelector('.player').classList.add('player--loader')
         return Promise.all([
                 loaders.subtitles(config.srtLink),
                 loaders.video(config.videoLink),
@@ -163,26 +159,34 @@
                 loaders.sfx('old.mp4')
             ])
             .then(res => {
+                document.querySelector('.player').classList.remove('player--loader')
+                let srt = res[0]
+                let video = res[1]
+                let audio = res[2]
+                let sfx = res[3]
+
+                video.addEventListener('ended', () => {
+                    sfx.pause()
+                })
+
                 let player = Player.instance('#player', {
-                    subtitle: new SubtitleShowControl(res[0]),
-                    video: res[1],
-                    audio: res[2]
-                });
-                window.test = player._subtitle
-                return [player, res[3]]
+                    subtitle: new SubtitleShowControl(srt),
+                    video,
+                    audio
+                })
+
+                return [player, oldFilm(res[3])]
             })
     }
 
     let appInit = function(e) {
         e.preventDefault()
-        if (Player._instance) {
-            return
-        }
+        if (Player._instance) { return }
         getPlayer(e.target.raw_serialize()).then(res => {
             let player = res[0]
-            let sfx = res[1]
-            player.effects = [grayscaleJS, oldFilm(sfx)]
-            // player.effects = [grayscaleGL(), oldFilm(sfx)]
+            let oldFilmSfx = res[1]
+            player.effects = [grayscaleJS, oldFilmSfx]
+            // player.effects = [grayscaleGL(), oldFilmSfx]
             player.play()
         })
     }
@@ -230,7 +234,7 @@
         audio: (link) => {
             return new Promise((resolve) => {
                 let audio = document.createElement('audio')
-                audio.crossOrigin = "anonymous";
+                audio.crossOrigin = "anonymous"
                 const audioContext = new(window.AudioContext || window.webkitAudioContext)()
                 audio.src = link
                 audio.addEventListener('loadeddata', () => {
@@ -263,16 +267,12 @@
                         return node
                     }())
 
-                    // pinkNoise.connect(gainNode)
-
                     gainNode.connect(audioContext.destination)
                     audio.addEventListener('pause', () => {
-                        // pinkNoise.stop()
                         pinkNoise.disconnect()
                     })
                     audio.addEventListener('play', () => {
-                        pinkNoise.connect(gainNode)
-                        // pinkNoise.start(0)
+                        pinkNoise.connect(audioContext.destination)
                     })
                     resolve(audio)
                 })
@@ -292,4 +292,4 @@
             })
         }
     }
-}());
+}())
